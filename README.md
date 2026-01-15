@@ -6,17 +6,27 @@ Virtual Assistant Query Interface for the BADSEED Ecosystem
 
 BADSEED AGENT is a read-only AI assistant powered by xAI's Grok that provides information about the BADSEED ecosystem, aggregating data from:
 
-- **Voice Node** (badseed-exposed) - Prophecies, narratives, sentiment
-- **Value Node** (badseed-token) - Token metrics, market data, donations
+- **Voice Node** (badseed.netlify.app) - Prophecies, narratives, sentiment
+- **Value Node** (badseedtoken.netlify.app) - Token metrics, market data, donations
 - **Brain Node** (badseed-program) - Orchestration and coordination
 
 ## Features
 
 - Terminal-style console interface
-- Real-time chat with Grok AI
+- Real-time chat with Grok-3 AI
 - Query aggregation across all BADSEED nodes
+- Identity correlation across nodes ("who am I?")
+- Wallet analysis for any Solana address
 - Dark cyberpunk theme matching BADSEED aesthetic
 - Read-only information queries (no actions)
+
+## Deployment Modes
+
+### Cloud Deployment (Production)
+The agent runs on Netlify as a serverless function. All functionality is self-contained.
+
+### Local Development
+For testing before deployment, run locally with the Express server.
 
 ## Setup
 
@@ -28,73 +38,78 @@ npm install
 
 ### 2. Environment Variables
 
-Create a `.env` file with your xAI API key:
+Create a `.env` file:
 
 ```env
+# Required
 XAI_API_KEY=your-xai-api-key-here
+
+# Optional - enables full wallet analysis (get free key at helius.dev)
+HELIUS_API_KEY=your-helius-api-key
 ```
 
-### 3. Development
+### 3. Local Development
 
 ```bash
-npm run dev
+# Option A: Full Netlify dev environment
+npm run start
+
+# Option B: Express server for API testing
+node server.js
 ```
 
-Runs on http://localhost:3003
+### 4. Testing Against Cloud
 
-### 4. Build
+To test the local frontend against the deployed cloud API, create `.env.local`:
 
-```bash
-npm run build
+```env
+VITE_AGENT_API_URL=https://your-deployed-netlify-url.netlify.app
 ```
 
 ### 5. Deploy to Netlify
 
-1. Connect repository to Netlify
-2. Set environment variable: `XAI_API_KEY`
-3. Deploy
+1. Push to GitHub repository
+2. Connect repository to Netlify
+3. Set environment variables in Netlify dashboard:
+   - `XAI_API_KEY` (required)
+   - `HELIUS_API_KEY` (optional, for wallet analysis)
+4. Deploy
 
 ## Usage
 
 Ask questions like:
 - "What's the current token price?"
 - "Show me the latest prophecy"
-- "What's the bonding curve progress?"
-- "Explain the BADSEED ecosystem"
+- "Who am I?" (identity correlation)
+- "Tell me about wallet 9Tyz..." (wallet analysis)
+- "What's the system activity?"
+
+## Agent Capabilities
+
+### Node Status Queries
+- `getVoiceNodeStatus()` - Sentiment, prophecies, wallet status
+- `getValueNodeStatus()` - Token metrics, price, market cap
+- `getSystemActivity()` - Donations, AI logs, health
+
+### Identity Recognition
+- `getUserIdentity()` - Correlates users across Voice and Value nodes
+- Matches wallet addresses with IP/location data
+- Provides confidence scores for identification
+
+### Wallet Analysis
+- `analyzeWallet(address)` - Deep analysis of any Solana wallet
+- Transaction history and patterns
+- BADSEED token holdings detection
+- Trading behavior profiling
 
 ## Technology Stack
 
 - **Frontend**: React 18 + TypeScript + Vite
-- **AI**: xAI Grok API
+- **AI**: xAI Grok-3 with function calling
+- **Blockchain**: Helius API for Solana data
 - **Styling**: Custom CSS (terminal theme)
 - **Deployment**: Netlify Functions
-- **Port**: 3003
-
-## Project Structure
-
-```
-badseed-agent/
-├── src/
-│   ├── components/
-│   │   └── AgentConsole.tsx
-│   ├── services/
-│   │   └── grokApi.ts
-│   ├── styles/
-│   │   ├── index.css
-│   │   ├── App.css
-│   │   └── AgentConsole.css
-│   ├── types/
-│   │   └── index.ts
-│   ├── App.tsx
-│   └── main.tsx
-├── netlify/
-│   └── functions/
-│       ├── grok-chat.ts
-│       └── fetch-node-data.ts
-├── package.json
-├── vite.config.ts
-└── netlify.toml
-```
+- **Port**: 3003 (local dev)
 
 ## API Endpoints
 
@@ -116,19 +131,24 @@ Send messages to Grok AI assistant
 }
 ```
 
-### GET /.netlify/functions/fetch-node-data?node={type}
-Fetch data from specific nodes
+## Project Structure
 
-**Parameters:**
-- `node`: "voice" | "value" | "brain"
-
-**Response:**
-```json
-{
-  "node": "value",
-  "data": { ... },
-  "timestamp": "2026-01-12T..."
-}
+```
+badseed-agent/
+├── src/
+│   ├── components/
+│   │   └── AgentConsole.tsx
+│   ├── services/
+│   │   └── grokApi.ts
+│   ├── styles/
+│   └── App.tsx
+├── netlify/
+│   └── functions/
+│       └── grok-chat.js      # Main agent function
+├── server.js                  # Local Express server
+├── correlation-endpoint.js    # User correlation logic
+├── netlify.toml
+└── package.json
 ```
 
 ## License

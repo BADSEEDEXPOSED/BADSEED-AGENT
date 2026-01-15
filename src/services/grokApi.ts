@@ -3,9 +3,19 @@ interface Message {
   content: string
 }
 
+// Configuration: Set to deployed URL when testing against cloud, empty for local
+// When deployed on Netlify, this should be empty (uses relative paths)
+// For local testing against cloud, set to your deployed Netlify URL
+const AGENT_API_BASE = import.meta.env.VITE_AGENT_API_URL || ''
+
 export async function sendMessage(userMessage: string, conversationHistory: Message[]): Promise<string> {
   try {
-    const response = await fetch('/api/grok-chat', {
+    // Use the cloud API if configured, otherwise use local/relative path
+    const apiUrl = AGENT_API_BASE
+      ? `${AGENT_API_BASE}/.netlify/functions/grok-chat`
+      : '/api/grok-chat'
+
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -31,7 +41,11 @@ export async function sendMessage(userMessage: string, conversationHistory: Mess
 
 export async function fetchNodeData(nodeType: 'voice' | 'value' | 'brain'): Promise<any> {
   try {
-    const response = await fetch(`/.netlify/functions/fetch-node-data?node=${nodeType}`)
+    const apiUrl = AGENT_API_BASE
+      ? `${AGENT_API_BASE}/.netlify/functions/fetch-node-data?node=${nodeType}`
+      : `/.netlify/functions/fetch-node-data?node=${nodeType}`
+
+    const response = await fetch(apiUrl)
 
     if (!response.ok) {
       throw new Error(`Failed to fetch ${nodeType} node data`)
