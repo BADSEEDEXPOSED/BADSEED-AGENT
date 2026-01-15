@@ -1,0 +1,21 @@
+node_modules/
+/dist/
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.DS_Store
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Local Netlify folder
+.netlify
+
+# API Keys Directory
+../secrets/
+
+# Temp files
+tmpclaude-*
+*.log

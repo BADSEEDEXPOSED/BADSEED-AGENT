@@ -1,0 +1,27 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# API endpoints route to serverless functions
+[[redirects]]
+  from = "/api/grok-chat"
+  to = "/.netlify/functions/grok-chat"
+  status = 200
+  force = true
+
+# SPA fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[dev]
+  command = "npm run dev"
+  port = 3003
+  targetPort = 3003
+  framework = "#custom"
+  functionsPort = 8888

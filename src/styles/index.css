@@ -1,0 +1,109 @@
+:root {
+  /* BADSEED Color Palette */
+  --color-bg-primary: #0a0a0a;
+  --color-bg-secondary: #111111;
+  --color-bg-tertiary: #1a1a1a;
+  --color-accent-green: #00ff41;
+  --color-accent-red: #ff0040;
+  --color-accent-purple: #b429f9;
+  --color-text-primary: #e0e0e0;
+  --color-text-secondary: #888888;
+  --color-text-dim: #555555;
+  --color-border: #333333;
+  --color-glow: rgba(0, 255, 65, 0.3);
+
+  /* Typography */
+  --font-mono: 'Courier New', 'Consolas', 'Monaco', monospace;
+  --font-size-base: 14px;
+  --font-size-small: 12px;
+  --font-size-large: 16px;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent-green);
+}
+
+/* Selection */
+::selection {
+  background: var(--color-accent-green);
+  color: var(--color-bg-primary);
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes glitch {
+  0% {
+    text-shadow: 0 0 10px var(--color-accent-green);
+  }
+  25% {
+    text-shadow: 2px 0 10px var(--color-accent-red);
+  }
+  50% {
+    text-shadow: -2px 0 10px var(--color-accent-purple);
+  }
+  75% {
+    text-shadow: 2px 0 10px var(--color-accent-green);
+  }
+  100% {
+    text-shadow: 0 0 10px var(--color-accent-green);
+  }
+}
+
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
