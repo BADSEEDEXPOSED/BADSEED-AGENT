@@ -6,6 +6,82 @@ const GROK_API_URL = 'https://api.x.ai/v1/chat/completions'
 const HELIUS_API_KEY = process.env.HELIUS_API_KEY
 const HELIUS_RPC_URL = HELIUS_API_KEY ? `https://mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}` : null
 
+// Upstash Redis for activity logging
+const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL
+const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN
+
+// Activity logging helper
+async function logActivity(data) {
+  if (!UPSTASH_URL || !UPSTASH_TOKEN) return null
+
+  try {
+    const entry = {
+      timestamp: Date.now(),
+      ...data
+    }
+
+    // Store in a list
+    await fetch(`${UPSTASH_URL}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${UPSTASH_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(['LPUSH', 'badseed:agent:activity', JSON.stringify(entry)])
+    })
+
+    // Trim to keep only last 1000
+    await fetch(`${UPSTASH_URL}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${UPSTASH_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(['LTRIM', 'badseed:agent:activity', '0', '999'])
+    })
+
+    // Track daily stats
+    const today = new Date().toISOString().split('T')[0]
+    await fetch(`${UPSTASH_URL}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${UPSTASH_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(['HINCRBY', `badseed:agent:stats:${today}`, 'queries', '1'])
+    })
+
+    // Track category
+    if (data.category) {
+      await fetch(`${UPSTASH_URL}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${UPSTASH_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(['HINCRBY', `badseed:agent:stats:${today}`, `cat:${data.category}`, '1'])
+      })
+    }
+
+    return entry
+  } catch (e) {
+    console.log('Activity logging failed:', e.message)
+    return null
+  }
+}
+
+// Categorize query
+function categorizeQuery(message) {
+  const lower = message.toLowerCase()
+  if (lower.includes('who am i') || lower.includes('know me') || lower.includes('identity')) return 'identity'
+  if (lower.includes('wallet') || lower.includes('address') || /[a-zA-Z0-9]{32,44}/.test(message)) return 'wallet_analysis'
+  if (lower.includes('price') || lower.includes('market') || lower.includes('token') || lower.includes('value')) return 'token_metrics'
+  if (lower.includes('prophecy') || lower.includes('sentiment') || lower.includes('voice')) return 'voice_node'
+  if (lower.includes('activity') || lower.includes('donation') || lower.includes('transaction')) return 'system_activity'
+  if (lower.includes('what is') || lower.includes('explain') || lower.includes('how does')) return 'education'
+  return 'general'
+}
+
 // Known BADSEED wallets for context
 const KNOWN_WALLETS = {
   '9TyzcephhXEw67piYNc72EJtgVmbq3AZhyPFSvdfXWdr': { name: 'BADSEED Creator Wallet', role: 'creator' },
@@ -525,6 +601,11 @@ export async function handler(event, context) {
       }
     }
 
+    // Extract user info from request for logging
+    const userIP = event.headers['x-forwarded-for']?.split(',')[0] || event.headers['client-ip'] || 'unknown'
+    const userAgent = event.headers['user-agent'] || 'unknown'
+    const category = categorizeQuery(message)
+
     const messages = [
       { role: 'system', content: SYSTEM_PROMPT },
       ...history
@@ -536,6 +617,7 @@ export async function handler(event, context) {
     // Function calling loop - max 3 iterations
     let iterations = 0
     const maxIterations = 3
+    const functionsUsed = [] // Track which functions are called
 
     while (iterations < maxIterations) {
       iterations++
@@ -567,10 +649,24 @@ export async function handler(event, context) {
 
       // If no tool calls, return the response
       if (!assistantMessage.tool_calls || assistantMessage.tool_calls.length === 0) {
+        const agentResponse = assistantMessage.content || 'No response from agent'
+
+        // Log the interaction
+        await logActivity({
+          type: 'query',
+          userIP,
+          userAgent,
+          category,
+          query: message.substring(0, 500), // Truncate long messages
+          responseLength: agentResponse.length,
+          functionsUsed: [],
+          conversationLength: history.length
+        })
+
         return {
           statusCode: 200,
           headers,
-          body: JSON.stringify({ response: assistantMessage.content || 'No response from agent' })
+          body: JSON.stringify({ response: agentResponse })
         }
       }
 
@@ -580,6 +676,7 @@ export async function handler(event, context) {
       // Execute tool calls
       for (const toolCall of assistantMessage.tool_calls) {
         const functionName = toolCall.function.name
+        functionsUsed.push(functionName) // Track function usage
         let functionResult
 
         if (functionName === 'getVoiceNodeStatus') {
@@ -604,6 +701,17 @@ export async function handler(event, context) {
         })
       }
     }
+
+    // Log interaction with function usage after loop completes
+    await logActivity({
+      type: 'query',
+      userIP,
+      userAgent,
+      category,
+      query: message.substring(0, 500),
+      functionsUsed,
+      conversationLength: history.length
+    })
 
     return {
       statusCode: 200,
