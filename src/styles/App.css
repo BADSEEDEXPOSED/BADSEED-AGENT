@@ -7,25 +7,7 @@
   position: relative;
 }
 
-/* Scanline effect overlay */
-.app-container::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    var(--color-accent-green) 50%,
-    transparent 100%
-  );
-  opacity: 0.1;
-  animation: scanline 8s linear infinite;
-  pointer-events: none;
-  z-index: 9999;
-}
+/* Scanline effect is now applied to screen areas only - see AgentConsole.css */
 
 .page-title {
   position: absolute;

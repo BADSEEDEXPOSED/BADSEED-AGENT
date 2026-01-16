@@ -68,19 +68,14 @@ function AgentConsole() {
     inputRef.current?.focus()
   }, [])
 
-  // Detect if running locally (localhost) or deployed
-  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-
   // Fetch live feed on mount and after each message
-  // Local shows local activity, deployed shows cloud activity
+  // Both local and deployed show cloud activity (cloud queries are public)
+  // Local queries are logged separately but not displayed
   const fetchLiveFeed = async () => {
     try {
-      // Use source parameter based on environment
-      const source = isLocal ? 'local' : 'cloud'
-      const baseUrl = isLocal
-        ? '/.netlify/functions/live-feed'
-        : 'https://badseed-agent.netlify.app/.netlify/functions/live-feed'
-      const url = `${baseUrl}?limit=10&source=${source}`
+      // Always fetch cloud activity - it's the public feed
+      // Local queries are logged to 'local' key but we display 'cloud' everywhere
+      const url = `/.netlify/functions/live-feed?limit=10&source=cloud`
 
       const response = await fetch(url)
       if (response.ok) {
@@ -104,11 +99,13 @@ function AgentConsole() {
     return () => clearInterval(interval)
   }, [])
 
-  // Refresh feed after sending a message
+  // Refresh feed and refocus input after sending a message
   useEffect(() => {
     if (!isLoading && messages.length > 1) {
       // Small delay to let the server log the activity
       setTimeout(fetchLiveFeed, 1000)
+      // Refocus the input field so user can type again immediately
+      inputRef.current?.focus()
     }
   }, [isLoading])
 
