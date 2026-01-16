@@ -10,13 +10,8 @@ const HELIUS_RPC_URL = HELIUS_API_KEY ? `https://mainnet.helius-rpc.com/?api-key
 const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL
 const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN
 
-// Check if running locally (netlify dev sets this, or check for localhost indicators)
-const IS_LOCAL_DEV = process.env.NETLIFY_DEV === 'true' || process.env.LOCAL_DEV === 'true'
-
-// Activity logging helper - only logs on deployed environment (not local)
+// Activity logging helper - logs all queries to cloud Redis
 async function logActivity(data) {
-  // Skip logging for local development - only log cloud queries
-  if (IS_LOCAL_DEV) return null
   if (!UPSTASH_URL || !UPSTASH_TOKEN) return null
 
   try {
