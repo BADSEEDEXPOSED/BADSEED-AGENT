@@ -13,6 +13,7 @@ interface ActivityItem {
   time: string
   category: string
   query: string
+  response: string | null
   functionsUsed: string[]
   userIP: string
 }
@@ -42,8 +43,21 @@ function AgentConsole() {
   const [isLoading, setIsLoading] = useState(false)
   const [liveFeed, setLiveFeed] = useState<LiveFeedData | null>(null)
   const [feedError, setFeedError] = useState<string | null>(null)
+  const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set())
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const toggleExpanded = (index: number) => {
+    setExpandedItems(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(index)) {
+        newSet.delete(index)
+      } else {
+        newSet.add(index)
+      }
+      return newSet
+    })
+  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -245,7 +259,11 @@ function AgentConsole() {
             <div className="feed-empty">No activity yet</div>
           )}
           {liveFeed?.activities?.map((activity, idx) => (
-            <div key={idx} className="activity-item">
+            <div
+              key={idx}
+              className={`activity-item ${expandedItems.has(idx) ? 'expanded' : ''}`}
+              onClick={() => toggleExpanded(idx)}
+            >
               <div className="activity-header">
                 <span className="activity-time">{activity.time}</span>
                 <span
@@ -254,13 +272,25 @@ function AgentConsole() {
                 >
                   {activity.category}
                 </span>
+                <span className="activity-toggle">{expandedItems.has(idx) ? '▼' : '▶'}</span>
               </div>
-              <div className="activity-query">"{activity.query}{activity.query.length >= 100 ? '...' : ''}"</div>
+              <div className="activity-query">"{activity.query}{activity.query.length >= 150 ? '...' : ''}"</div>
               {activity.functionsUsed?.length > 0 && (
                 <div className="activity-functions">
                   {activity.functionsUsed.map((fn, i) => (
                     <span key={i} className="function-tag">{fn}</span>
                   ))}
+                </div>
+              )}
+              {expandedItems.has(idx) && activity.response && (
+                <div className="activity-response">
+                  <div className="response-label">AGENT RESPONSE:</div>
+                  <div className="response-content">{activity.response}</div>
+                </div>
+              )}
+              {expandedItems.has(idx) && !activity.response && (
+                <div className="activity-response no-response">
+                  <span className="response-label">No response logged</span>
                 </div>
               )}
             </div>

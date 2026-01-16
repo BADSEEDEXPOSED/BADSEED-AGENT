@@ -937,13 +937,14 @@ export async function handler(event, context) {
       if (!assistantMessage.tool_calls || assistantMessage.tool_calls.length === 0) {
         const agentResponse = assistantMessage.content || 'No response from agent'
 
-        // Log the interaction
+        // Log the interaction with response
         await logActivity({
           type: 'query',
           userIP,
           userAgent,
           category,
           query: message.substring(0, 500), // Truncate long messages
+          response: agentResponse.substring(0, 1000), // Store truncated response
           responseLength: agentResponse.length,
           functionsUsed: [],
           conversationLength: history.length
@@ -1002,13 +1003,33 @@ export async function handler(event, context) {
       }
     }
 
-    // Log interaction with function usage after loop completes
+    // If we exit the loop without a proper response, make one final call
+    const finalResponse = await fetch(GROK_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROK_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'grok-3',
+        messages: messages,
+        temperature: 0.3,
+        max_tokens: 500
+      })
+    })
+
+    const finalData = await finalResponse.json()
+    const agentResponse = finalData.choices[0]?.message?.content || 'Processing completed.'
+
+    // Log interaction with function usage and response
     await logActivity({
       type: 'query',
       userIP,
       userAgent,
       category,
       query: message.substring(0, 500),
+      response: agentResponse.substring(0, 1000),
+      responseLength: agentResponse.length,
       functionsUsed,
       conversationLength: history.length
     })
@@ -1016,7 +1037,7 @@ export async function handler(event, context) {
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ response: 'Processing completed. Query the agent for results.' })
+      body: JSON.stringify({ response: agentResponse })
     }
 
   } catch (error) {

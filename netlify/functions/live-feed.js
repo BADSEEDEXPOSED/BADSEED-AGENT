@@ -83,7 +83,8 @@ export async function handler(event, context) {
           timestamp: a.timestamp,
           time: new Date(a.timestamp).toLocaleTimeString(),
           category: a.category || 'general',
-          query: a.query?.substring(0, 100) || '',
+          query: a.query?.substring(0, 150) || '',
+          response: a.response || null,
           functionsUsed: a.functionsUsed || [],
           userIP: a.userIP?.substring(0, 10) + '...' || 'unknown'
         })),
