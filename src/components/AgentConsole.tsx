@@ -28,9 +28,6 @@ interface LiveFeedData {
   lastUpdate: string | null
 }
 
-// Get API base URL
-const API_BASE = import.meta.env.VITE_AGENT_API_URL || ''
-
 function AgentConsole() {
   const [messages, setMessages] = useState<Message[]>([
     {
