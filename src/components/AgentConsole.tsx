@@ -72,19 +72,23 @@ function AgentConsole() {
   }, [])
 
   // Fetch live feed on mount and after each message
+  // Always fetch from the deployed cloud endpoint to show cloud activity
   const fetchLiveFeed = async () => {
     try {
-      const url = API_BASE
-        ? `${API_BASE}/.netlify/functions/live-feed?limit=10`
-        : '/.netlify/functions/live-feed?limit=10'
+      // Always use cloud URL for live feed - shows real deployed activity
+      const cloudUrl = 'https://badseed-agent.netlify.app/.netlify/functions/live-feed?limit=10'
 
-      const response = await fetch(url)
+      const response = await fetch(cloudUrl)
       if (response.ok) {
         const data = await response.json()
         setLiveFeed(data)
         setFeedError(null)
+      } else {
+        console.error('Live feed response not ok:', response.status)
+        setFeedError(`Feed error: ${response.status}`)
       }
     } catch (err) {
+      console.error('Live feed fetch error:', err)
       setFeedError('Feed unavailable')
     }
   }
