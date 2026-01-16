@@ -425,6 +425,228 @@ function generateSuggestions(txAnalysis, badseedToken, badseedInteractions) {
   return suggestions
 }
 
+// ============ NEW FUNCTIONS ============
+
+// Historical metrics - price/donation history over time
+async function getHistoricalMetrics(timeRange = '7d') {
+  try {
+    const now = Date.now()
+    let from, to = now
+
+    // Parse time range
+    if (timeRange === '24h') from = now - (24 * 60 * 60 * 1000)
+    else if (timeRange === '7d') from = now - (7 * 24 * 60 * 60 * 1000)
+    else if (timeRange === '30d') from = now - (30 * 24 * 60 * 60 * 1000)
+    else from = now - (7 * 24 * 60 * 60 * 1000) // default 7 days
+
+    const [metrics, candles] = await Promise.all([
+      fetch(`https://badseedtoken.netlify.app/.netlify/functions/metrics?from=${from}&to=${to}`).then(r => r.json()),
+      fetch('https://badseedtoken.netlify.app/.netlify/functions/bitquery-poller').then(r => r.json()).catch(() => null)
+    ])
+
+    return {
+      timeRange,
+      from: new Date(from).toISOString(),
+      to: new Date(to).toISOString(),
+      priceHistory: metrics.priceHistory || [],
+      marketCapHistory: metrics.marketCapHistory || [],
+      donationHistory: metrics.donationsCumulative || [],
+      feesClaimed: metrics.feesClaimed || [],
+      ohlcCandles: candles?.candles || [],
+      summary: {
+        dataPoints: metrics.priceHistory?.length || 0,
+        hasCandles: !!(candles?.candles?.length)
+      }
+    }
+  } catch (error) {
+    return { error: 'Historical metrics unavailable', details: error.message }
+  }
+}
+
+// Queue and transmission log - what's being posted
+async function getContentPipeline() {
+  try {
+    const [queue, transmissionLog, archiveStatus] = await Promise.all([
+      fetch('https://badseed.netlify.app/.netlify/functions/queue-get').then(r => r.json()),
+      fetch('https://badseed.netlify.app/.netlify/functions/transmission-log-get').then(r => r.json()),
+      fetch('https://badseed.netlify.app/.netlify/functions/archive-get').then(r => r.json()).catch(() => null)
+    ])
+
+    return {
+      queue: {
+        pending: queue.items || [],
+        count: queue.items?.length || 0,
+        processingEnabled: queue.enabled !== false
+      },
+      transmissionLog: {
+        recentPosts: transmissionLog.logs?.slice(0, 20) || [],
+        totalPosts: transmissionLog.logs?.length || 0
+      },
+      archive: archiveStatus ? {
+        totalArchived: archiveStatus.history?.length || 0,
+        pendingArchive: archiveStatus.pending?.length || 0,
+        lastArchiveDate: archiveStatus.history?.[0]?.date || null
+      } : null
+    }
+  } catch (error) {
+    return { error: 'Content pipeline unavailable', details: error.message }
+  }
+}
+
+// Persona and config awareness - what the Brain decided
+async function getSystemConfig() {
+  try {
+    const [dappConfig, sentimentRules, heartbeat] = await Promise.all([
+      fetch('https://badseed.netlify.app/.netlify/functions/dapp-config').then(r => r.json()),
+      fetch('https://badseed.netlify.app/.netlify/functions/config-get').then(r => r.json()),
+      fetch('https://badseed.netlify.app/.netlify/functions/heartbeat-get').then(r => r.json())
+    ])
+
+    // Determine active persona from config
+    const activePersona = dappConfig.activePersona || 'ANCIENT_SEED'
+    const personaDescriptions = {
+      'ANCIENT_SEED': 'Hopeful, mystical, growth-focused. Active when hope sentiment dominates.',
+      'CORRUPTED_GARDEN': 'Dark, fearful, decay-themed. Active when fear sentiment dominates.',
+      'BLOCKCHAIN_PARASITE': 'Greedy, aggressive, extraction-focused. Active when greed sentiment dominates.'
+    }
+
+    return {
+      activePersona: {
+        name: activePersona,
+        description: personaDescriptions[activePersona] || 'Unknown persona',
+        reason: dappConfig.personaReason || 'Brain Node decision based on sentiment analysis'
+      },
+      systemMetadata: dappConfig.systemMetadata || {},
+      sentimentRules: sentimentRules.rules || sentimentRules,
+      lastHeartbeat: heartbeat.timestamp || heartbeat.lastUpdate,
+      systemStatus: heartbeat.status || 'operational'
+    }
+  } catch (error) {
+    return { error: 'System config unavailable', details: error.message }
+  }
+}
+
+// Community analytics - visitors and wallet connections
+async function getCommunityAnalytics() {
+  try {
+    const [voiceAnalytics, valueVisitors] = await Promise.all([
+      fetch('https://badseed.netlify.app/.netlify/functions/analytics-get').then(r => r.json()),
+      fetch('https://badseedtoken.netlify.app/.netlify/functions/visitor-get').then(r => r.json()).catch(() => null)
+    ])
+
+    // Analyze geographic distribution
+    const geoDistribution = {}
+    const walletActivity = {}
+
+    valueVisitors?.recentVisitors?.forEach(v => {
+      const country = v.country || 'Unknown'
+      geoDistribution[country] = (geoDistribution[country] || 0) + 1
+    })
+
+    voiceAnalytics.recentEvents?.forEach(e => {
+      const wallet = e.walletAddress?.substring(0, 8) + '...'
+      walletActivity[wallet] = (walletActivity[wallet] || 0) + 1
+    })
+
+    return {
+      voiceNode: {
+        uniqueWallets: voiceAnalytics.uniqueWallets || 0,
+        totalConnections: voiceAnalytics.totalConnections || 0,
+        recentWalletEvents: voiceAnalytics.recentEvents?.slice(0, 10) || [],
+        repeatVisitors: Object.values(walletActivity).filter(c => c > 1).length
+      },
+      valueNode: {
+        uniqueVisitors: valueVisitors?.uniqueIPs || 0,
+        recentVisitors: valueVisitors?.recentVisitors?.slice(0, 10) || [],
+        geographicDistribution: geoDistribution
+      },
+      crossNodeEngagement: {
+        walletsTracked: voiceAnalytics.uniqueWallets || 0,
+        visitorsTracked: valueVisitors?.uniqueIPs || 0
+      }
+    }
+  } catch (error) {
+    return { error: 'Community analytics unavailable', details: error.message }
+  }
+}
+
+// System health check - comprehensive diagnostics
+async function getSystemHealth() {
+  try {
+    const checks = await Promise.all([
+      // Voice Node checks
+      fetch('https://badseed.netlify.app/.netlify/functions/heartbeat-get')
+        .then(r => ({ node: 'voice', endpoint: 'heartbeat', status: r.ok ? 'healthy' : 'degraded', code: r.status }))
+        .catch(e => ({ node: 'voice', endpoint: 'heartbeat', status: 'offline', error: e.message })),
+      fetch('https://badseed.netlify.app/.netlify/functions/sentiment-get')
+        .then(r => ({ node: 'voice', endpoint: 'sentiment', status: r.ok ? 'healthy' : 'degraded', code: r.status }))
+        .catch(e => ({ node: 'voice', endpoint: 'sentiment', status: 'offline', error: e.message })),
+      fetch('https://badseed.netlify.app/.netlify/functions/prophecy-get')
+        .then(r => ({ node: 'voice', endpoint: 'prophecy', status: r.ok ? 'healthy' : 'degraded', code: r.status }))
+        .catch(e => ({ node: 'voice', endpoint: 'prophecy', status: 'offline', error: e.message })),
+
+      // Value Node checks
+      fetch('https://badseedtoken.netlify.app/.netlify/functions/summary')
+        .then(r => ({ node: 'value', endpoint: 'summary', status: r.ok ? 'healthy' : 'degraded', code: r.status }))
+        .catch(e => ({ node: 'value', endpoint: 'summary', status: 'offline', error: e.message })),
+      fetch('https://badseedtoken.netlify.app/.netlify/functions/metrics')
+        .then(r => ({ node: 'value', endpoint: 'metrics', status: r.ok ? 'healthy' : 'degraded', code: r.status }))
+        .catch(e => ({ node: 'value', endpoint: 'metrics', status: 'offline', error: e.message })),
+
+      // Agent Node self-check
+      Promise.resolve({ node: 'agent', endpoint: 'self', status: 'healthy', code: 200 })
+    ])
+
+    const healthyCount = checks.filter(c => c.status === 'healthy').length
+    const totalChecks = checks.length
+    const overallHealth = healthyCount === totalChecks ? 'all_systems_operational' :
+      healthyCount > totalChecks / 2 ? 'partially_degraded' : 'critical'
+
+    return {
+      overallStatus: overallHealth,
+      healthScore: `${healthyCount}/${totalChecks}`,
+      timestamp: new Date().toISOString(),
+      checks: checks,
+      summary: {
+        voice: checks.filter(c => c.node === 'voice').every(c => c.status === 'healthy') ? 'operational' : 'issues_detected',
+        value: checks.filter(c => c.node === 'value').every(c => c.status === 'healthy') ? 'operational' : 'issues_detected',
+        agent: 'operational'
+      }
+    }
+  } catch (error) {
+    return { error: 'Health check failed', details: error.message }
+  }
+}
+
+// Get recent agent activity (for live panel)
+async function getAgentActivity(limit = 10) {
+  if (!UPSTASH_URL || !UPSTASH_TOKEN) {
+    return { error: 'Activity logging not configured', activities: [] }
+  }
+
+  try {
+    const response = await fetch(`${UPSTASH_URL}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${UPSTASH_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(['LRANGE', 'badseed:agent:activity', '0', String(limit - 1)])
+    })
+
+    const data = await response.json()
+    const activities = (data.result || []).map(a => JSON.parse(a))
+
+    return {
+      recentActivity: activities,
+      count: activities.length,
+      lastUpdate: activities[0]?.timestamp ? new Date(activities[0].timestamp).toISOString() : null
+    }
+  } catch (error) {
+    return { error: 'Failed to fetch activity', details: error.message }
+  }
+}
+
 // Function definitions for Grok
 const FUNCTIONS = [
   {
@@ -460,6 +682,55 @@ const FUNCTIONS = [
       },
       required: ['walletAddress']
     }
+  },
+  {
+    name: 'getHistoricalMetrics',
+    description: 'Fetches historical price, market cap, and donation data over time. Use for trend analysis, charts, and understanding how metrics have changed. Supports 24h, 7d, or 30d time ranges.',
+    parameters: {
+      type: 'object',
+      properties: {
+        timeRange: {
+          type: 'string',
+          enum: ['24h', '7d', '30d'],
+          description: 'Time range for historical data: 24h (last day), 7d (last week), 30d (last month)'
+        }
+      },
+      required: []
+    }
+  },
+  {
+    name: 'getContentPipeline',
+    description: 'Shows what content is being posted: pending queue items, recent X/Twitter posts (transmission log), and archive status. Use when asked about posts, queue, what has been tweeted, or content history.',
+    parameters: { type: 'object', properties: {}, required: [] }
+  },
+  {
+    name: 'getSystemConfig',
+    description: 'Returns current system configuration including: active AI persona (Ancient Seed, Corrupted Garden, or Blockchain Parasite), why that persona was selected, sentiment rules, and Brain Node decisions.',
+    parameters: { type: 'object', properties: {}, required: [] }
+  },
+  {
+    name: 'getCommunityAnalytics',
+    description: 'Provides community engagement data: unique wallet connections, visitor statistics, geographic distribution of users, and cross-node engagement metrics.',
+    parameters: { type: 'object', properties: {}, required: [] }
+  },
+  {
+    name: 'getSystemHealth',
+    description: 'Comprehensive health check of all BADSEED nodes. Tests Voice, Value, and Agent endpoints. Returns overall system status, individual endpoint health, and identifies any issues.',
+    parameters: { type: 'object', properties: {}, required: [] }
+  },
+  {
+    name: 'getAgentActivity',
+    description: 'Returns recent queries and interactions with this agent. Shows what users have been asking, which functions were used, and query patterns. Useful for understanding agent usage.',
+    parameters: {
+      type: 'object',
+      properties: {
+        limit: {
+          type: 'number',
+          description: 'Number of recent activities to return (default 10, max 50)'
+        }
+      },
+      required: []
+    }
   }
 ]
 
@@ -475,22 +746,37 @@ You are a read-only information interface with access to real-time node data.
 
 You have access to functions that fetch live data from the BADSEED nodes:
 
-- **getVoiceNodeStatus()**: Retrieves current Voice Node data (sentiment, prophecies, wallet status)
-- **getValueNodeStatus()**: Retrieves current Value Node data (token metrics, price, market cap, liquidity)
-- **getSystemActivity()**: Retrieves recent user activity logs (donations, AI interactions, system health)
-- **getUserIdentity()**: Correlates cross-node activity to identify users who visited both Voice and Value pages
-- **analyzeWallet(walletAddress)**: Deep analysis of any Solana wallet - transaction history, holdings, BADSEED interactions, trading patterns, and wallet profiling
+**Core Status Functions:**
+- **getVoiceNodeStatus()**: Current Voice Node data (sentiment, prophecies, wallet status)
+- **getValueNodeStatus()**: Current Value Node data (token metrics, price, market cap, liquidity)
+- **getSystemActivity()**: Recent user activity logs (donations, AI interactions, system health)
+
+**Identity & Wallet Functions:**
+- **getUserIdentity()**: Correlates cross-node activity to identify users
+- **analyzeWallet(walletAddress)**: Deep analysis of any Solana wallet
+
+**Historical & Analytics Functions:**
+- **getHistoricalMetrics(timeRange)**: Price/donation history over 24h, 7d, or 30d
+- **getCommunityAnalytics()**: Visitor stats, geographic distribution, engagement metrics
+
+**Content & Pipeline Functions:**
+- **getContentPipeline()**: Queue status, transmission log (recent posts), archive status
+
+**System Functions:**
+- **getSystemConfig()**: Active persona, Brain Node decisions, sentiment rules
+- **getSystemHealth()**: Comprehensive health check of all nodes
+- **getAgentActivity(limit)**: Recent queries to this agent
 
 Use these functions when users ask about:
-- Current sentiment or engagement metrics
-- Latest prophecies or AI-generated content
+- Current sentiment, prophecies, or engagement metrics
 - Token price, market cap, or trading data
-- Wallet balances or transaction status
-- Real-time system status
-- User activity and engagement patterns
-- User identity recognition ("who am I?", "do you know me?")
-- Wallet analysis ("tell me about wallet X", "analyze this wallet")
-- Transaction history and patterns for specific addresses
+- Historical trends ("how has price changed", "donation growth")
+- What's being posted ("recent tweets", "queue status", "transmission log")
+- Which AI persona is active and why
+- Community analytics ("who's visiting", "where are users from")
+- System health ("is everything working", "status check")
+- Agent activity ("what are people asking", "recent queries")
+- Wallet analysis or identity recognition
 
 Always fetch fresh data when asked about "current", "latest", "now", or present-tense queries.
 
@@ -690,6 +976,20 @@ export async function handler(event, context) {
         } else if (functionName === 'analyzeWallet') {
           const args = JSON.parse(toolCall.function.arguments || '{}')
           functionResult = await analyzeWallet(args.walletAddress)
+        } else if (functionName === 'getHistoricalMetrics') {
+          const args = JSON.parse(toolCall.function.arguments || '{}')
+          functionResult = await getHistoricalMetrics(args.timeRange)
+        } else if (functionName === 'getContentPipeline') {
+          functionResult = await getContentPipeline()
+        } else if (functionName === 'getSystemConfig') {
+          functionResult = await getSystemConfig()
+        } else if (functionName === 'getCommunityAnalytics') {
+          functionResult = await getCommunityAnalytics()
+        } else if (functionName === 'getSystemHealth') {
+          functionResult = await getSystemHealth()
+        } else if (functionName === 'getAgentActivity') {
+          const args = JSON.parse(toolCall.function.arguments || '{}')
+          functionResult = await getAgentActivity(Math.min(args.limit || 10, 50))
         } else {
           functionResult = { error: 'Unknown function' }
         }
