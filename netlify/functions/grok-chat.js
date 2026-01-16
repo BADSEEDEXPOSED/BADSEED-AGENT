@@ -10,24 +10,32 @@ const HELIUS_RPC_URL = HELIUS_API_KEY ? `https://mainnet.helius-rpc.com/?api-key
 const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL
 const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN
 
-// Activity logging helper - logs all queries to cloud Redis
+// Detect if running locally (netlify dev)
+const IS_LOCAL = process.env.NETLIFY_DEV === 'true'
+
+// Activity logging helper - logs to separate lists for local vs cloud
 async function logActivity(data) {
   if (!UPSTASH_URL || !UPSTASH_TOKEN) return null
+
+  // Add source tag
+  const source = IS_LOCAL ? 'local' : 'cloud'
 
   try {
     const entry = {
       timestamp: Date.now(),
+      source,
       ...data
     }
 
-    // Store in a list
+    // Store in source-specific list (local or cloud)
+    const listKey = `badseed:agent:activity:${source}`
     await fetch(`${UPSTASH_URL}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${UPSTASH_TOKEN}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(['LPUSH', 'badseed:agent:activity', JSON.stringify(entry)])
+      body: JSON.stringify(['LPUSH', listKey, JSON.stringify(entry)])
     })
 
     // Trim to keep only last 1000
@@ -37,7 +45,7 @@ async function logActivity(data) {
         'Authorization': `Bearer ${UPSTASH_TOKEN}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(['LTRIM', 'badseed:agent:activity', '0', '999'])
+      body: JSON.stringify(['LTRIM', listKey, '0', '999'])
     })
 
     // Track daily stats

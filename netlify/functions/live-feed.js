@@ -31,15 +31,18 @@ export async function handler(event, context) {
   try {
     const params = event.queryStringParameters || {}
     const limit = Math.min(parseInt(params.limit) || 20, 50)
+    // Source filter: 'local', 'cloud', or 'all' (default: 'cloud')
+    const source = params.source || 'cloud'
 
-    // Get recent activities
+    // Get recent activities from source-specific list
+    const listKey = source === 'all' ? 'badseed:agent:activity:cloud' : `badseed:agent:activity:${source}`
     const activitiesRes = await fetch(`${UPSTASH_URL}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${UPSTASH_TOKEN}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(['LRANGE', 'badseed:agent:activity', '0', String(limit - 1)])
+      body: JSON.stringify(['LRANGE', listKey, '0', String(limit - 1)])
     })
 
     const activitiesData = await activitiesRes.json()
@@ -63,14 +66,14 @@ export async function handler(event, context) {
       stats[statsArray[i]] = parseInt(statsArray[i + 1])
     }
 
-    // Get total activity count
+    // Get total activity count for this source
     const countRes = await fetch(`${UPSTASH_URL}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${UPSTASH_TOKEN}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(['LLEN', 'badseed:agent:activity'])
+      body: JSON.stringify(['LLEN', listKey])
     })
 
     const countData = await countRes.json()
@@ -79,6 +82,7 @@ export async function handler(event, context) {
       statusCode: 200,
       headers,
       body: JSON.stringify({
+        source,
         activities: activities.map(a => ({
           timestamp: a.timestamp,
           time: new Date(a.timestamp).toLocaleTimeString(),
@@ -86,6 +90,7 @@ export async function handler(event, context) {
           query: a.query?.substring(0, 150) || '',
           response: a.response || null,
           functionsUsed: a.functionsUsed || [],
+          source: a.source || 'cloud',
           userIP: a.userIP?.substring(0, 10) + '...' || 'unknown'
         })),
         todayStats: {

@@ -68,14 +68,21 @@ function AgentConsole() {
     inputRef.current?.focus()
   }, [])
 
+  // Detect if running locally (localhost) or deployed
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+
   // Fetch live feed on mount and after each message
-  // Always fetch from the deployed cloud endpoint to show cloud activity
+  // Local shows local activity, deployed shows cloud activity
   const fetchLiveFeed = async () => {
     try {
-      // Always use cloud URL for live feed - shows real deployed activity
-      const cloudUrl = 'https://badseed-agent.netlify.app/.netlify/functions/live-feed?limit=10'
+      // Use source parameter based on environment
+      const source = isLocal ? 'local' : 'cloud'
+      const baseUrl = isLocal
+        ? '/.netlify/functions/live-feed'
+        : 'https://badseed-agent.netlify.app/.netlify/functions/live-feed'
+      const url = `${baseUrl}?limit=10&source=${source}`
 
-      const response = await fetch(cloudUrl)
+      const response = await fetch(url)
       if (response.ok) {
         const data = await response.json()
         setLiveFeed(data)
