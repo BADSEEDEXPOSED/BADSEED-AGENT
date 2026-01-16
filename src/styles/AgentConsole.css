@@ -81,7 +81,7 @@
 
 .console-messages {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: scroll;
   padding: var(--spacing-md);
   background: var(--color-bg-primary);
   font-size: var(--font-size-base);
@@ -348,7 +348,7 @@
 /* Activity Feed */
 .activity-feed {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: scroll;
   padding: var(--spacing-sm);
   background: var(--color-bg-primary);
   position: relative;
