@@ -10,10 +10,11 @@ const AGENT_API_BASE = import.meta.env.VITE_AGENT_API_URL || ''
 
 export async function sendMessage(userMessage: string, conversationHistory: Message[]): Promise<string> {
   try {
-    // Use the cloud API if configured, otherwise use local/relative path
+    // Use the cloud API if configured, otherwise use relative path
+    // Relative path works for both local (netlify dev) and deployed
     const apiUrl = AGENT_API_BASE
       ? `${AGENT_API_BASE}/.netlify/functions/grok-chat`
-      : '/api/grok-chat'
+      : '/.netlify/functions/grok-chat'
 
     const response = await fetch(apiUrl, {
       method: 'POST',

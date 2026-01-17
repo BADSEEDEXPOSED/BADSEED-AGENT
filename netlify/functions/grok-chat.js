@@ -151,7 +151,7 @@ async function getUserIdentity() {
     // Fetch visitor data from Value Node
     let visitorData = { recentVisitors: [], uniqueIPs: 0 }
     try {
-      const visitorRes = await fetch('https://badseedtoken.netlify.app/.netlify/functions/visitor-get')
+      const visitorRes = await fetch('https://badseed-token.netlify.app/.netlify/functions/visitor-get')
       if (visitorRes.ok) {
         const data = await visitorRes.json()
         if (data.recentVisitors && Array.isArray(data.recentVisitors)) {
@@ -448,8 +448,8 @@ async function getHistoricalMetrics(timeRange = '7d') {
     else from = now - (7 * 24 * 60 * 60 * 1000) // default 7 days
 
     const [metrics, candles] = await Promise.all([
-      fetch(`https://badseedtoken.netlify.app/.netlify/functions/metrics?from=${from}&to=${to}`).then(r => r.json()),
-      fetch('https://badseedtoken.netlify.app/.netlify/functions/bitquery-poller').then(r => r.json()).catch(() => null)
+      fetch(`https://badseed-token.netlify.app/.netlify/functions/metrics?from=${from}&to=${to}`).then(r => r.json()),
+      fetch('https://badseed-token.netlify.app/.netlify/functions/bitquery-poller').then(r => r.json()).catch(() => null)
     ])
 
     return {
@@ -539,7 +539,7 @@ async function getCommunityAnalytics() {
   try {
     const [voiceAnalytics, valueVisitors] = await Promise.all([
       fetch('https://badseed.netlify.app/.netlify/functions/analytics-get').then(r => r.json()),
-      fetch('https://badseedtoken.netlify.app/.netlify/functions/visitor-get').then(r => r.json()).catch(() => null)
+      fetch('https://badseed-token.netlify.app/.netlify/functions/visitor-get').then(r => r.json()).catch(() => null)
     ])
 
     // Analyze geographic distribution
@@ -594,10 +594,10 @@ async function getSystemHealth() {
         .catch(e => ({ node: 'voice', endpoint: 'prophecy', status: 'offline', error: e.message })),
 
       // Value Node checks
-      fetch('https://badseedtoken.netlify.app/.netlify/functions/summary')
+      fetch('https://badseed-token.netlify.app/.netlify/functions/summary')
         .then(r => ({ node: 'value', endpoint: 'summary', status: r.ok ? 'healthy' : 'degraded', code: r.status }))
         .catch(e => ({ node: 'value', endpoint: 'summary', status: 'offline', error: e.message })),
-      fetch('https://badseedtoken.netlify.app/.netlify/functions/metrics')
+      fetch('https://badseed-token.netlify.app/.netlify/functions/metrics')
         .then(r => ({ node: 'value', endpoint: 'metrics', status: r.ok ? 'healthy' : 'degraded', code: r.status }))
         .catch(e => ({ node: 'value', endpoint: 'metrics', status: 'offline', error: e.message })),
 

@@ -68,23 +68,51 @@ function AgentConsole() {
     inputRef.current?.focus()
   }, [])
 
+  // Detect if running locally (localhost) or deployed
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+
   // Fetch live feed on mount and after each message
-  // Both local and deployed show cloud activity (cloud queries are public)
-  // Local queries are logged separately but not displayed
+  // Local shows BOTH local + cloud queries, deployed shows only cloud
   const fetchLiveFeed = async () => {
     try {
-      // Always fetch cloud activity - it's the public feed
-      // Local queries are logged to 'local' key but we display 'cloud' everywhere
-      const url = `/.netlify/functions/live-feed?limit=10&source=cloud`
+      if (isLocal) {
+        // On localhost: fetch both local and cloud, merge by timestamp
+        const [localRes, cloudRes] = await Promise.all([
+          fetch('/.netlify/functions/live-feed?limit=10&source=local'),
+          fetch('/.netlify/functions/live-feed?limit=10&source=cloud')
+        ])
 
-      const response = await fetch(url)
-      if (response.ok) {
-        const data = await response.json()
-        setLiveFeed(data)
-        setFeedError(null)
+        if (localRes.ok && cloudRes.ok) {
+          const localData = await localRes.json()
+          const cloudData = await cloudRes.json()
+
+          // Merge activities and sort by timestamp (newest first)
+          const mergedActivities = [
+            ...(localData.activities || []),
+            ...(cloudData.activities || [])
+          ].sort((a, b) => b.timestamp - a.timestamp).slice(0, 10)
+
+          setLiveFeed({
+            activities: mergedActivities,
+            todayStats: cloudData.todayStats, // Use cloud stats
+            totalAllTime: (localData.totalAllTime || 0) + (cloudData.totalAllTime || 0),
+            lastUpdate: mergedActivities[0]?.timestamp ? new Date(mergedActivities[0].timestamp).toISOString() : null
+          })
+          setFeedError(null)
+        } else {
+          setFeedError(`Feed error: ${localRes.status}/${cloudRes.status}`)
+        }
       } else {
-        console.error('Live feed response not ok:', response.status)
-        setFeedError(`Feed error: ${response.status}`)
+        // On deployed: only show cloud queries
+        const response = await fetch('/.netlify/functions/live-feed?limit=10&source=cloud')
+        if (response.ok) {
+          const data = await response.json()
+          setLiveFeed(data)
+          setFeedError(null)
+        } else {
+          console.error('Live feed response not ok:', response.status)
+          setFeedError(`Feed error: ${response.status}`)
+        }
       }
     } catch (err) {
       console.error('Live feed fetch error:', err)
