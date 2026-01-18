@@ -1,23 +1,27 @@
-import { useState, useRef } from 'react'
-import videoSrc from '../assets/bg.mp4'
+import { useState, useRef, useEffect } from 'react'
 
 const VideoBackground = () => {
   const [isMuted, setIsMuted] = useState(true)
   const videoRef = useRef<HTMLVideoElement>(null)
 
+  useEffect(() => {
+    if (videoRef.current) {
+      // Browsers requires many videos to be muted for autoplay
+      videoRef.current.muted = true
+      videoRef.current.play().catch(e => console.warn("Initial autoplay blocked:", e))
+    }
+  }, [])
+
   const toggleMute = () => {
     if (videoRef.current) {
-      // Toggle the DOM property directly
-      const targetMuted = !videoRef.current.muted
+      const targetMuted = !isMuted
       videoRef.current.muted = targetMuted
+      setIsMuted(targetMuted)
 
       if (!targetMuted) {
         videoRef.current.volume = 1.0
-        // Browsers often require a play() call after a user gesture if it was auto-paused
         videoRef.current.play().catch(val => console.error("Unmute play signal failed:", val))
       }
-
-      setIsMuted(targetMuted)
     }
   }
 
@@ -25,13 +29,14 @@ const VideoBackground = () => {
     <div className="video-background-container">
       <video
         ref={videoRef}
-        src={videoSrc}
         autoPlay
         loop
         muted
         playsInline
         className="bg-video"
-      />
+      >
+        <source src="/bg.mp4" type="video/mp4" />
+      </video>
 
       <div className="video-controls">
         <button
