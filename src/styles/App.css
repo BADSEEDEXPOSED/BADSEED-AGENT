@@ -3,7 +3,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, #0a0a0a 0%, #050505 100%);
+  background: transparent;
   position: relative;
 }
 
@@ -15,7 +15,7 @@
   left: var(--spacing-xl);
   font-size: var(--font-size-large);
   font-weight: bold;
-  color: var(--color-accent-green);
+  color: var(--color-accent-bright);
   text-transform: uppercase;
   letter-spacing: 2px;
   line-height: 1.4;

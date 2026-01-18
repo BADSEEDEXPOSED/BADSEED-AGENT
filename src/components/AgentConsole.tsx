@@ -190,9 +190,9 @@ function AgentConsole() {
       'voice_node': '#96ceb4',
       'system_activity': '#dda0dd',
       'education': '#f7dc6f',
-      'general': '#00ff41'
+      'general': '#00fbff'
     }
-    return colors[category] || '#00ff41'
+    return colors[category] || '#00fbff'
   }
 
   return (
@@ -220,14 +220,19 @@ function AgentConsole() {
             <div key={idx} className={`message message-${msg.role}`}>
               <span className="message-timestamp">[{formatTime(msg.timestamp)}]</span>
               <span className="message-prefix">
-                {msg.role === 'user' ? '> ' : msg.role === 'assistant' ? '< AGENT: ' : '# '}
+                {msg.role === 'user' ? '> ' : (
+                  <img src="/favicon.ico" alt="BS" className="prefix-icon" />
+                )}
+                {msg.role === 'assistant' && 'AGENT: '}
               </span>
               <span className="message-content">{msg.content}</span>
             </div>
           ))}
           {isLoading && (
             <div className="message message-system">
-              <span className="message-prefix"># </span>
+              <span className="message-prefix">
+                <img src="/favicon.ico" alt="BS" className="prefix-icon" />
+              </span>
               <span className="message-content loading">Processing query...</span>
             </div>
           )}

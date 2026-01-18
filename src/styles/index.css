@@ -1,16 +1,19 @@
 :root {
   /* BADSEED Color Palette */
-  --color-bg-primary: #0a0a0a;
-  --color-bg-secondary: #111111;
-  --color-bg-tertiary: #1a1a1a;
-  --color-accent-green: #00ff41;
+  --color-bg-primary: transparent;
+  --color-bg-secondary: rgba(10, 10, 10, 0.4);
+  --color-bg-tertiary: rgba(20, 20, 20, 0.6);
+  --glass-frost: blur(12px) saturate(180%);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --color-accent-cyan: #c0e8ed;
+  --color-accent-bright: #00fbff;
   --color-accent-red: #ff0040;
   --color-accent-purple: #b429f9;
   --color-text-primary: #e0e0e0;
-  --color-text-secondary: #888888;
-  --color-text-dim: #555555;
-  --color-border: #333333;
-  --color-glow: rgba(0, 255, 65, 0.3);
+  --color-text-secondary: #f0f0f0;
+  --color-text-dim: #bbbbbb;
+  --color-border: rgba(192, 232, 237, 0.2);
+  --color-glow: rgba(192, 232, 237, 0.1);
 
   /* Typography */
   --font-mono: 'Courier New', 'Consolas', 'Monaco', monospace;
@@ -62,20 +65,23 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent-green);
+  background: var(--color-accent-cyan);
 }
 
 /* Selection */
 ::selection {
-  background: var(--color-accent-green);
+  background: var(--color-accent-cyan);
   color: var(--color-bg-primary);
 }
 
 /* Animations */
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
@@ -83,19 +89,23 @@ body {
 
 @keyframes glitch {
   0% {
-    text-shadow: 0 0 10px var(--color-accent-green);
+    text-shadow: 0 0 10px var(--color-accent-bright);
   }
+
   25% {
     text-shadow: 2px 0 10px var(--color-accent-red);
   }
+
   50% {
     text-shadow: -2px 0 10px var(--color-accent-purple);
   }
+
   75% {
-    text-shadow: 2px 0 10px var(--color-accent-green);
+    text-shadow: 2px 0 10px var(--color-accent-bright);
   }
+
   100% {
-    text-shadow: 0 0 10px var(--color-accent-green);
+    text-shadow: 0 0 10px var(--color-accent-bright);
   }
 }
 
@@ -103,6 +113,7 @@ body {
   0% {
     transform: translateY(-100%);
   }
+
   100% {
     transform: translateY(100vh);
   }
