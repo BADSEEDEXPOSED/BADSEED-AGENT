@@ -123,6 +123,19 @@ async function getValueNodeStatus() {
   }
 }
 
+// Token historical milestones (cached data, no rate limit concerns)
+async function getTokenHistory() {
+  try {
+    const response = await fetch('https://badseedtoken.netlify.app/.netlify/functions/token-history')
+    if (!response.ok) {
+      return { error: 'Token history unavailable', status: response.status }
+    }
+    return await response.json()
+  } catch (error) {
+    return { error: 'Token history unavailable', details: error.message }
+  }
+}
+
 async function getSystemActivity() {
   try {
     const [transmissionLogs, aiLogs, heartbeat] = await Promise.all([
@@ -739,6 +752,11 @@ const FUNCTIONS = [
       },
       required: []
     }
+  },
+  {
+    name: 'getTokenHistory',
+    description: 'Fetches historical token milestones and achievements: current phase (pre-launch, pumpswap, raydium), all-time high market cap and when it occurred, highest bonding curve progress reached, days since launch, total fees claimed, and total donations received. Use for questions about token history, achievements, milestones, or "has the token ever reached X".',
+    parameters: { type: 'object', properties: {}, required: [] }
   }
 ]
 
@@ -766,6 +784,7 @@ You have access to functions that fetch live data from the BADSEED nodes:
 **Historical & Analytics Functions:**
 - **getHistoricalMetrics(timeRange)**: Price/donation history over 24h, 7d, or 30d
 - **getCommunityAnalytics()**: Visitor stats, geographic distribution, engagement metrics
+- **getTokenHistory()**: Token milestones - ATH market cap, highest curve progress, phase history, days since launch, total fees claimed
 
 **Content & Pipeline Functions:**
 - **getContentPipeline()**: Queue status, transmission log (recent posts), archive status
@@ -999,6 +1018,8 @@ export async function handler(event, context) {
         } else if (functionName === 'getAgentActivity') {
           const args = JSON.parse(toolCall.function.arguments || '{}')
           functionResult = await getAgentActivity(Math.min(args.limit || 10, 50))
+        } else if (functionName === 'getTokenHistory') {
+          functionResult = await getTokenHistory()
         } else {
           functionResult = { error: 'Unknown function' }
         }
