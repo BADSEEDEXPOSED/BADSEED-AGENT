@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import videoSrc from '../assets/bg.mp4'
 
 const VideoBackground = () => {
   const [isMuted, setIsMuted] = useState(true)
@@ -6,8 +7,17 @@ const VideoBackground = () => {
 
   const toggleMute = () => {
     if (videoRef.current) {
-      videoRef.current.muted = !videoRef.current.muted
-      setIsMuted(videoRef.current.muted)
+      const newMutedState = !isMuted
+
+      // Update property directly for immediate browser effect
+      videoRef.current.muted = newMutedState
+      if (!newMutedState) {
+        videoRef.current.volume = 0.5 // Default unmuted volume
+        videoRef.current.play().catch(e => console.error("Video play failed:", e))
+      }
+
+      // Update state for React UI
+      setIsMuted(newMutedState)
     }
   }
 
@@ -17,11 +27,11 @@ const VideoBackground = () => {
         ref={videoRef}
         autoPlay
         loop
-        muted
+        muted={isMuted}
         playsInline
         className="bg-video"
       >
-        <source src="/bg.mp4" type="video/mp4" />
+        <source src={videoSrc} type="video/mp4" />
       </video>
 
       <div className="video-controls">
