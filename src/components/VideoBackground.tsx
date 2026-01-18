@@ -40,8 +40,10 @@ const VideoBackground = () => {
 
       <div className="video-controls">
         <button
+          type="button"
           onClick={toggleMute}
           className="mute-btn"
+          style={{ pointerEvents: 'auto' }}
           title={isMuted ? "Unmute Environment" : "Mute Environment"}
         >
           {isMuted ? "🔇" : "🔊"}
