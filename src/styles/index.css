@@ -38,7 +38,7 @@
 body {
   font-family: var(--font-mono);
   font-size: var(--font-size-base);
-  background-color: var(--color-bg-primary);
+  background-color: #000;
   color: var(--color-text-primary);
   line-height: 1.6;
   overflow-x: hidden;
