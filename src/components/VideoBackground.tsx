@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react'
-import videoSrc from '../assets/bg.mp4'
 
 const VideoBackground = () => {
   const [isMuted, setIsMuted] = useState(true)
@@ -36,7 +35,7 @@ const VideoBackground = () => {
         playsInline
         className="bg-video"
       >
-        <source src={videoSrc} type="video/mp4" />
+        <source src="/bg.mp4" type="video/mp4" />
       </video>
 
       <div className="video-controls">
