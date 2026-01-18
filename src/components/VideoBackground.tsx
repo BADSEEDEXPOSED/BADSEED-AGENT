@@ -1,40 +1,40 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 
 const VideoBackground = () => {
-    const [isMuted, setIsMuted] = useState(true)
-    const videoRef = useRef<HTMLVideoElement>(null)
+  const [isMuted, setIsMuted] = useState(true)
+  const videoRef = useRef<HTMLVideoElement>(null)
 
-    const toggleMute = () => {
-        if (videoRef.current) {
-            videoRef.current.muted = !videoRef.current.muted
-            setIsMuted(videoRef.current.muted)
-        }
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted
+      setIsMuted(videoRef.current.muted)
     }
+  }
 
-    return (
-        <div className="video-background-container">
-            <video
-                ref={videoRef}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="bg-video"
-            >
-                <source src="/bg.mp4" type="video/mp4" />
-            </video>
+  return (
+    <div className="video-background-container">
+      <video
+        ref={videoRef}
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="bg-video"
+      >
+        <source src="/bg.mp4" type="video/mp4" />
+      </video>
 
-            <div className="video-controls">
-                <button
-                    onClick={toggleMute}
-                    className="mute-btn"
-                    title={isMuted ? "Unmute Environment" : "Mute Environment"}
-                >
-                    {isMuted ? "🔇" : "🔊"}
-                </button>
-            </div>
+      <div className="video-controls">
+        <button
+          onClick={toggleMute}
+          className="mute-btn"
+          title={isMuted ? "Unmute Environment" : "Mute Environment"}
+        >
+          {isMuted ? "🔇" : "🔊"}
+        </button>
+      </div>
 
-            <style>{`
+      <style>{`
         .video-background-container {
           position: fixed;
           top: 0;
@@ -110,8 +110,8 @@ const VideoBackground = () => {
           box-shadow: 0 0 10px rgba(0, 251, 255, 0.2);
         }
       `}</style>
-        </div>
-    )
+    </div>
+  )
 }
 
 export default VideoBackground
