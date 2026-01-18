@@ -7,17 +7,17 @@ const VideoBackground = () => {
 
   const toggleMute = () => {
     if (videoRef.current) {
-      const newMutedState = !isMuted
+      // Toggle the DOM property directly
+      const targetMuted = !videoRef.current.muted
+      videoRef.current.muted = targetMuted
 
-      // Update property directly for immediate browser effect
-      videoRef.current.muted = newMutedState
-      if (!newMutedState) {
-        videoRef.current.volume = 0.5 // Default unmuted volume
-        videoRef.current.play().catch(e => console.error("Video play failed:", e))
+      if (!targetMuted) {
+        videoRef.current.volume = 1.0
+        // Browsers often require a play() call after a user gesture if it was auto-paused
+        videoRef.current.play().catch(val => console.error("Unmute play signal failed:", val))
       }
 
-      // Update state for React UI
-      setIsMuted(newMutedState)
+      setIsMuted(targetMuted)
     }
   }
 
@@ -25,14 +25,13 @@ const VideoBackground = () => {
     <div className="video-background-container">
       <video
         ref={videoRef}
+        src={videoSrc}
         autoPlay
         loop
-        muted={isMuted}
+        muted
         playsInline
         className="bg-video"
-      >
-        <source src={videoSrc} type="video/mp4" />
-      </video>
+      />
 
       <div className="video-controls">
         <button
