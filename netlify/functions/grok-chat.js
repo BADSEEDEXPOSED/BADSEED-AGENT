@@ -101,9 +101,9 @@ const KNOWN_WALLETS = {
 async function getVoiceNodeStatus() {
   try {
     const [sentiment, prophecy, wallet] = await Promise.all([
-      fetch('https://badseed.netlify.app/.netlify/functions/sentiment-get').then(r => r.json()),
-      fetch('https://badseed.netlify.app/.netlify/functions/prophecy-get').then(r => r.json()),
-      fetch('https://badseed.netlify.app/.netlify/functions/wallet-status').then(r => r.json())
+      fetch('https://badseed.exposed/.netlify/functions/sentiment-get').then(r => r.json()),
+      fetch('https://badseed.exposed/.netlify/functions/prophecy-get').then(r => r.json()),
+      fetch('https://badseed.exposed/.netlify/functions/wallet-status').then(r => r.json())
     ])
     return { sentiment, prophecy, wallet }
   } catch (error) {
@@ -114,8 +114,8 @@ async function getVoiceNodeStatus() {
 async function getValueNodeStatus() {
   try {
     const [summary, metrics] = await Promise.all([
-      fetch('https://badseedtoken.netlify.app/.netlify/functions/summary').then(r => r.json()),
-      fetch('https://badseedtoken.netlify.app/.netlify/functions/metrics').then(r => r.json())
+      fetch('https://token.badseed.exposed/.netlify/functions/summary').then(r => r.json()),
+      fetch('https://token.badseed.exposed/.netlify/functions/metrics').then(r => r.json())
     ])
     return { summary, metrics }
   } catch (error) {
@@ -126,7 +126,7 @@ async function getValueNodeStatus() {
 // Token historical milestones (cached data, no rate limit concerns)
 async function getTokenHistory() {
   try {
-    const response = await fetch('https://badseedtoken.netlify.app/.netlify/functions/token-history')
+    const response = await fetch('https://token.badseed.exposed/.netlify/functions/token-history')
     if (!response.ok) {
       return { error: 'Token history unavailable', status: response.status }
     }
@@ -139,9 +139,9 @@ async function getTokenHistory() {
 async function getSystemActivity() {
   try {
     const [transmissionLogs, aiLogs, heartbeat] = await Promise.all([
-      fetch('https://badseed.netlify.app/.netlify/functions/transmission-log-get').then(r => r.json()),
-      fetch('https://badseed.netlify.app/.netlify/functions/ai-logs-get').then(r => r.json()),
-      fetch('https://badseed.netlify.app/.netlify/functions/heartbeat-get').then(r => r.json())
+      fetch('https://badseed.exposed/.netlify/functions/transmission-log-get').then(r => r.json()),
+      fetch('https://badseed.exposed/.netlify/functions/ai-logs-get').then(r => r.json()),
+      fetch('https://badseed.exposed/.netlify/functions/heartbeat-get').then(r => r.json())
     ])
 
     return {
@@ -158,13 +158,13 @@ async function getSystemActivity() {
 async function getUserIdentity() {
   try {
     // Fetch wallet connections from Voice Node
-    const walletRes = await fetch('https://badseed.netlify.app/.netlify/functions/analytics-get')
+    const walletRes = await fetch('https://badseed.exposed/.netlify/functions/analytics-get')
     const walletData = await walletRes.json()
 
     // Fetch visitor data from Value Node
     let visitorData = { recentVisitors: [], uniqueIPs: 0 }
     try {
-      const visitorRes = await fetch('https://badseedtoken.netlify.app/.netlify/functions/visitor-get')
+      const visitorRes = await fetch('https://token.badseed.exposed/.netlify/functions/visitor-get')
       if (visitorRes.ok) {
         const data = await visitorRes.json()
         if (data.recentVisitors && Array.isArray(data.recentVisitors)) {
@@ -461,8 +461,8 @@ async function getHistoricalMetrics(timeRange = '7d') {
     else from = now - (7 * 24 * 60 * 60 * 1000) // default 7 days
 
     const [metrics, candles] = await Promise.all([
-      fetch(`https://badseedtoken.netlify.app/.netlify/functions/metrics?from=${from}&to=${to}`).then(r => r.json()),
-      fetch('https://badseedtoken.netlify.app/.netlify/functions/bitquery-poller').then(r => r.json()).catch(() => null)
+      fetch(`https://token.badseed.exposed/.netlify/functions/metrics?from=${from}&to=${to}`).then(r => r.json()),
+      fetch('https://token.badseed.exposed/.netlify/functions/bitquery-poller').then(r => r.json()).catch(() => null)
     ])
 
     return {
@@ -488,9 +488,9 @@ async function getHistoricalMetrics(timeRange = '7d') {
 async function getContentPipeline() {
   try {
     const [queue, transmissionLog, archiveStatus] = await Promise.all([
-      fetch('https://badseed.netlify.app/.netlify/functions/queue-get').then(r => r.json()),
-      fetch('https://badseed.netlify.app/.netlify/functions/transmission-log-get').then(r => r.json()),
-      fetch('https://badseed.netlify.app/.netlify/functions/archive-get').then(r => r.json()).catch(() => null)
+      fetch('https://badseed.exposed/.netlify/functions/queue-get').then(r => r.json()),
+      fetch('https://badseed.exposed/.netlify/functions/transmission-log-get').then(r => r.json()),
+      fetch('https://badseed.exposed/.netlify/functions/archive-get').then(r => r.json()).catch(() => null)
     ])
 
     return {
@@ -518,9 +518,9 @@ async function getContentPipeline() {
 async function getSystemConfig() {
   try {
     const [dappConfig, sentimentRules, heartbeat] = await Promise.all([
-      fetch('https://badseed.netlify.app/.netlify/functions/dapp-config').then(r => r.json()),
-      fetch('https://badseed.netlify.app/.netlify/functions/config-get').then(r => r.json()),
-      fetch('https://badseed.netlify.app/.netlify/functions/heartbeat-get').then(r => r.json())
+      fetch('https://badseed.exposed/.netlify/functions/dapp-config').then(r => r.json()),
+      fetch('https://badseed.exposed/.netlify/functions/config-get').then(r => r.json()),
+      fetch('https://badseed.exposed/.netlify/functions/heartbeat-get').then(r => r.json())
     ])
 
     // Determine active persona from config
@@ -551,8 +551,8 @@ async function getSystemConfig() {
 async function getCommunityAnalytics() {
   try {
     const [voiceAnalytics, valueVisitors] = await Promise.all([
-      fetch('https://badseed.netlify.app/.netlify/functions/analytics-get').then(r => r.json()),
-      fetch('https://badseedtoken.netlify.app/.netlify/functions/visitor-get').then(r => r.json()).catch(() => null)
+      fetch('https://badseed.exposed/.netlify/functions/analytics-get').then(r => r.json()),
+      fetch('https://token.badseed.exposed/.netlify/functions/visitor-get').then(r => r.json()).catch(() => null)
     ])
 
     // Analyze geographic distribution
@@ -596,21 +596,21 @@ async function getSystemHealth() {
   try {
     const checks = await Promise.all([
       // Voice Node checks
-      fetch('https://badseed.netlify.app/.netlify/functions/heartbeat-get')
+      fetch('https://badseed.exposed/.netlify/functions/heartbeat-get')
         .then(r => ({ node: 'voice', endpoint: 'heartbeat', status: r.ok ? 'healthy' : 'degraded', code: r.status }))
         .catch(e => ({ node: 'voice', endpoint: 'heartbeat', status: 'offline', error: e.message })),
-      fetch('https://badseed.netlify.app/.netlify/functions/sentiment-get')
+      fetch('https://badseed.exposed/.netlify/functions/sentiment-get')
         .then(r => ({ node: 'voice', endpoint: 'sentiment', status: r.ok ? 'healthy' : 'degraded', code: r.status }))
         .catch(e => ({ node: 'voice', endpoint: 'sentiment', status: 'offline', error: e.message })),
-      fetch('https://badseed.netlify.app/.netlify/functions/prophecy-get')
+      fetch('https://badseed.exposed/.netlify/functions/prophecy-get')
         .then(r => ({ node: 'voice', endpoint: 'prophecy', status: r.ok ? 'healthy' : 'degraded', code: r.status }))
         .catch(e => ({ node: 'voice', endpoint: 'prophecy', status: 'offline', error: e.message })),
 
       // Value Node checks
-      fetch('https://badseedtoken.netlify.app/.netlify/functions/summary')
+      fetch('https://token.badseed.exposed/.netlify/functions/summary')
         .then(r => ({ node: 'value', endpoint: 'summary', status: r.ok ? 'healthy' : 'degraded', code: r.status }))
         .catch(e => ({ node: 'value', endpoint: 'summary', status: 'offline', error: e.message })),
-      fetch('https://badseedtoken.netlify.app/.netlify/functions/metrics')
+      fetch('https://token.badseed.exposed/.netlify/functions/metrics')
         .then(r => ({ node: 'value', endpoint: 'metrics', status: r.ok ? 'healthy' : 'degraded', code: r.status }))
         .catch(e => ({ node: 'value', endpoint: 'metrics', status: 'offline', error: e.message })),
 
@@ -777,7 +777,7 @@ Links will open in new tabs for the user.
 Examples:
 - "Install the Jupiter wallet from [Chrome Web Store](https://chromewebstore.google.com/detail/jupiter-wallet/iledlaeogohbilgbfhmbgkgmpplbfboh)"
 - "View on [Solscan](https://solscan.io/token/3HPpMLK7LjKFqSnCsBYNiijhNTo7dkkx3FCSAHKSpump)"
-- "Check the [Voice Node](https://badseed.netlify.app)"
+- "Check the [Voice Node](https://badseed.exposed)"
 
 ## THE OPEN WALLET - CORE CONCEPT
 
@@ -906,16 +906,16 @@ No emotion. No judgment. No persuasion.
 The BADSEED ecosystem consists of three interconnected nodes:
 
 **Voice Node (badseed-exposed)**: Generates AI prophecies via three personas, posts to social media, tracks sentiment, processes donations.
-- URL: [badseed.netlify.app](https://badseed.netlify.app)
+- URL: [badseed.exposed](https://badseed.exposed)
 
 **Value Node (badseed-token)**: Token: $BADSEED on Solana blockchain. Bonding curve mechanics. Tracks market metrics.
-- URL: [badseedtoken.netlify.app](https://badseedtoken.netlify.app)
+- URL: [token.badseed.exposed](https://token.badseed.exposed)
 - Token: [View on Solscan](https://solscan.io/token/3HPpMLK7LjKFqSnCsBYNiijhNTo7dkkx3FCSAHKSpump)
 
 **Brain Node (badseed-program)**: Cloud-hosted orchestration layer. Runs every 10 minutes. Makes decisions based on sentiment and market data.
 
 **Agent Node (badseed-agent)**: This interface. Data oracle providing real-time information access.
-- URL: [badseed-agent.netlify.app](https://badseed-agent.netlify.app)
+- URL: [agent.badseed.exposed](https://agent.badseed.exposed)
 
 **Known Wallets**:
 - BADSEED Wallet / Creator Wallet (OPEN - Public Seed Phrase): 9TyzcephhXEw67piYNc72EJtgVmbq3AZhyPFSvdfXWdr

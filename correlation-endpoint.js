@@ -4,13 +4,13 @@
 export async function correlateUserActivity() {
     try {
         // Fetch wallet connections from Voice Node
-        const walletRes = await fetch('https://badseed.netlify.app/.netlify/functions/analytics-get');
+        const walletRes = await fetch('https://badseed.exposed/.netlify/functions/analytics-get');
         const walletData = await walletRes.json();
 
         // Fetch visitor data from Value Node (using visitor-get endpoint)
         let visitorData = { recentVisitors: [], uniqueIPs: 0 };
         try {
-            const visitorRes = await fetch('https://badseedtoken.netlify.app/.netlify/functions/visitor-get');
+            const visitorRes = await fetch('https://token.badseed.exposed/.netlify/functions/visitor-get');
             if (visitorRes.ok) {
                 const data = await visitorRes.json();
                 // Transform visitor-get format to correlation format

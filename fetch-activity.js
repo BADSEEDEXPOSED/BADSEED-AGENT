@@ -4,7 +4,7 @@
 import dotenv from 'dotenv'
 dotenv.config()
 
-const AGENT_URL = process.env.VITE_AGENT_API_URL || 'https://badseed-agent.netlify.app'
+const AGENT_URL = process.env.VITE_AGENT_API_URL || 'https://agent.badseed.exposed'
 const ADMIN_TOKEN = process.env.AGENT_ADMIN_TOKEN || 'badseed-agent-admin'
 
 async function fetchActivity(limit = 50) {

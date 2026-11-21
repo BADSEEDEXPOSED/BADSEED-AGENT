@@ -27,9 +27,9 @@ const KNOWN_WALLETS = {
 async function getVoiceNodeStatus() {
   try {
     const [sentiment, prophecy, wallet] = await Promise.all([
-      fetch('https://badseed.netlify.app/.netlify/functions/sentiment-get').then(r => r.json()),
-      fetch('https://badseed.netlify.app/.netlify/functions/prophecy-get').then(r => r.json()),
-      fetch('https://badseed.netlify.app/.netlify/functions/wallet-status').then(r => r.json())
+      fetch('https://badseed.exposed/.netlify/functions/sentiment-get').then(r => r.json()),
+      fetch('https://badseed.exposed/.netlify/functions/prophecy-get').then(r => r.json()),
+      fetch('https://badseed.exposed/.netlify/functions/wallet-status').then(r => r.json())
     ])
     return { sentiment, prophecy, wallet }
   } catch (error) {
@@ -40,8 +40,8 @@ async function getVoiceNodeStatus() {
 async function getValueNodeStatus() {
   try {
     const [summary, metrics] = await Promise.all([
-      fetch('https://badseed-token.netlify.app/.netlify/functions/summary').then(r => r.json()),
-      fetch('https://badseed-token.netlify.app/.netlify/functions/metrics').then(r => r.json())
+      fetch('https://token.badseed.exposed/.netlify/functions/summary').then(r => r.json()),
+      fetch('https://token.badseed.exposed/.netlify/functions/metrics').then(r => r.json())
     ])
     return { summary, metrics }
   } catch (error) {
@@ -52,9 +52,9 @@ async function getValueNodeStatus() {
 async function getSystemActivity() {
   try {
     const [transmissionLogs, aiLogs, heartbeat] = await Promise.all([
-      fetch('https://badseed.netlify.app/.netlify/functions/transmission-log-get').then(r => r.json()),
-      fetch('https://badseed.netlify.app/.netlify/functions/ai-logs-get').then(r => r.json()),
-      fetch('https://badseed.netlify.app/.netlify/functions/heartbeat-get').then(r => r.json())
+      fetch('https://badseed.exposed/.netlify/functions/transmission-log-get').then(r => r.json()),
+      fetch('https://badseed.exposed/.netlify/functions/ai-logs-get').then(r => r.json()),
+      fetch('https://badseed.exposed/.netlify/functions/heartbeat-get').then(r => r.json())
     ])
 
     return {

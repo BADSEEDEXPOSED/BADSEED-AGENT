@@ -19,3 +19,11 @@ yarn-error.log
 # Temp files
 tmpclaude-*
 *.log
+
+# Cloudflare Wrangler & local logs
+.wrangler/
+*.log
+tmpclaude-*
+build-restored-live/
+.netlify-live-check.html
+_ul
