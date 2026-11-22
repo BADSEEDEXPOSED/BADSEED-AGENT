@@ -5,15 +5,15 @@
   --color-bg-tertiary: rgba(20, 20, 20, 0.6);
   --glass-frost: blur(12px) saturate(180%);
   --glass-border: rgba(255, 255, 255, 0.1);
-  --color-accent-cyan: #c0e8ed;
-  --color-accent-bright: #00fbff;
+  --color-accent-cyan: #9ab886;
+  --color-accent-bright: #7fa650;
   --color-accent-red: #ff0040;
   --color-accent-purple: #b429f9;
   --color-text-primary: #e0e0e0;
   --color-text-secondary: #f0f0f0;
   --color-text-dim: #bbbbbb;
-  --color-border: rgba(192, 232, 237, 0.2);
-  --color-glow: rgba(192, 232, 237, 0.1);
+  --color-border: rgba(127, 166, 80, 0.28);
+  --color-glow: rgba(127, 166, 80, 0.14);
 
   /* Typography */
   --font-mono: 'Courier New', 'Consolas', 'Monaco', monospace;

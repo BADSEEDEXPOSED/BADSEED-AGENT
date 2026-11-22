@@ -190,9 +190,9 @@ function AgentConsole() {
       'voice_node': '#96ceb4',
       'system_activity': '#dda0dd',
       'education': '#f7dc6f',
-      'general': '#00fbff'
+      'general': '#7fa650'
     }
-    return colors[category] || '#00fbff'
+    return colors[category] || '#7fa650'
   }
 
   return (
