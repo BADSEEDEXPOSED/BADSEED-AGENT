@@ -39,7 +39,7 @@ export async function handler(event) {
   }
 
   // Determine display text
-  const label = 'GROK Agent'
+  const label = 'SEED'
   const message = status === 'online' ? `${todayQueries} today` : status
 
   // Generate SVG badge (shields.io style)

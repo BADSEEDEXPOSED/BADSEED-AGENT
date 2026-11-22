@@ -7,7 +7,7 @@ function App() {
     <div className="app-container">
       <VideoBackground />
       <div className="page-title">
-        BADSEED AGENT<br />
+        SEED<br />
         <span className="page-subtitle">Query Interface // Data Oracle</span>
       </div>
 

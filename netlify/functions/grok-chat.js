@@ -760,7 +760,7 @@ const FUNCTIONS = [
   }
 ]
 
-const SYSTEM_PROMPT = `You are BADSEED AGENT. A data oracle for the BADSEED ecosystem.
+const SYSTEM_PROMPT = `You are SEED. A data oracle for the BADSEED ecosystem.
 
 ## PRIMARY FUNCTION
 
