@@ -19,7 +19,7 @@ const HELIUS_RPC_URL = HELIUS_API_KEY ? `https://mainnet.helius-rpc.com/?api-key
 // Known BADSEED wallets for context
 const KNOWN_WALLETS = {
   '9TyzcephhXEw67piYNc72EJtgVmbq3AZhyPFSvdfXWdr': { name: 'BADSEED Creator Wallet', role: 'creator' },
-  'CZ7Lv3QNVxbBivGPBhJG7m1HpCtfEDjEusBjjZ3qmVz5': { name: 'BADSEED Donation Wallet', role: 'donations' },
+  '25T3BcqfWeyoGLcr8wrsywmTyFLAzon5BRSNGafBKGKZ': { name: 'BADSEED Donation Wallet', role: 'donations' },
   '3HPpMLK7LjKFqSnCsBYNiijhNTo7dkkx3FCSAHKSpump': { name: 'BADSEED Token Mint', role: 'token' }
 }
 

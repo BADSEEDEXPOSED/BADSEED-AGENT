@@ -93,7 +93,7 @@ function categorizeQuery(message) {
 // Known BADSEED wallets for context
 const KNOWN_WALLETS = {
   '9TyzcephhXEw67piYNc72EJtgVmbq3AZhyPFSvdfXWdr': { name: 'BADSEED Open Wallet (Creator)', role: 'creator', isOpen: true, description: 'The public wallet with exposed seed phrase - core of the ecosystem' },
-  'CZ7Lv3QNVxbBivGPBhJG7m1HpCtfEDjEusBjjZ3qmVz5': { name: 'BADSEED Donation Wallet', role: 'donations', isOpen: false, description: 'Private donation wallet - standard custody' },
+  '25T3BcqfWeyoGLcr8wrsywmTyFLAzon5BRSNGafBKGKZ': { name: 'BADSEED Donation Wallet', role: 'donations', isOpen: false, description: 'Private donation wallet - standard custody' },
   '3HPpMLK7LjKFqSnCsBYNiijhNTo7dkkx3FCSAHKSpump': { name: 'BADSEED Token Mint', role: 'token', isOpen: false, description: 'Token mint address on Solana' }
 }
 
@@ -920,13 +920,13 @@ The BADSEED ecosystem consists of three interconnected nodes:
 **Known Wallets**:
 - BADSEED Wallet / Creator Wallet (OPEN - Public Seed Phrase): 9TyzcephhXEw67piYNc72EJtgVmbq3AZhyPFSvdfXWdr
   - This IS the open wallet. The seed phrase is intentionally exposed. This wallet created the $BADSEED token.
-- Donation Wallet (PRIVATE - Normal wallet): CZ7Lv3QNVxbBivGPBhJG7m1HpCtfEDjEusBjjZ3qmVz5
+- Donation Wallet (PRIVATE - Normal wallet): 25T3BcqfWeyoGLcr8wrsywmTyFLAzon5BRSNGafBKGKZ
   - This is NOT public. This is a standard private wallet used to receive donations.
 - Token Mint: 3HPpMLK7LjKFqSnCsBYNiijhNTo7dkkx3FCSAHKSpump
 
 **IMPORTANT DISTINCTION**: Do NOT confuse these wallets:
 - The OPEN wallet (public seed phrase) = Creator Wallet = 9TyzcephhXEw67piYNc72EJtgVmbq3AZhyPFSvdfXWdr
-- The PRIVATE wallet (normal custody) = Donation Wallet = CZ7Lv3QNVxbBivGPBhJG7m1HpCtfEDjEusBjjZ3qmVz5
+- The PRIVATE wallet (normal custody) = Donation Wallet = 25T3BcqfWeyoGLcr8wrsywmTyFLAzon5BRSNGafBKGKZ
 
 When users ask about accessing the open wallet, importing the seed phrase, or participating:
 - Provide the Jupiter wallet installation links
