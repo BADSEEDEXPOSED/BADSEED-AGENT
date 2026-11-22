@@ -1017,7 +1017,7 @@ export async function handler(event, context) {
           'Authorization': `Bearer ${GROK_API_KEY}`
         },
         body: JSON.stringify({
-          model: 'grok-3',
+          model: 'grok-3-mini',
           messages: messages,
           temperature: 0.3,
           max_tokens: 500,
@@ -1115,7 +1115,7 @@ export async function handler(event, context) {
         'Authorization': `Bearer ${GROK_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'grok-3',
+        model: 'grok-3-mini',
         messages: messages,
         temperature: 0.3,
         max_tokens: 500
